@@ -3,11 +3,11 @@ import Collection from 'mongodb/lib/collection';
 import envLoader from './env_loader';
 
 /**
- *  the class DBClient
+ * Represents a MongoDB client.
  */
 class DBClient {
   /**
-   *  creates a client to MongoDB
+   * Creates a new DBClient instance.
    */
   constructor() {
     envLoader();
@@ -19,6 +19,7 @@ class DBClient {
     this.client = new mongodb.MongoClient(dbURL, { useUnifiedTopology: true });
     this.client.connect();
   }
+
 
   /**
    * @returns {boolean}
@@ -34,7 +35,7 @@ class DBClient {
     return this.client.db().collection('users').countDocuments();
   }
 
-  /**.
+  /**
    * @returns {Promise<Number>}
    */
   async nbFiles() {
