@@ -1,61 +1,35 @@
-import { promisify } from 'util';
-import { createClient } from 'redis';
+const redis = require('redis');
+const { promisify } = require('util');
 
-/**
- *  the class RedisClient
- */
 class RedisClient {
-  /**
-   * The Class that creates a client to Redis
-   */
   constructor() {
-    this.client = createClient();
-    this.isClientConnected = true;
-    this.client.on('error', (err) => {
-      console.error('Redis client failed to connect:', err.message || err.toString());
-      this.isClientConnected = false;
-    });
-    this.client.on('connect', () => {
-      this.isClientConnected = true;
+    this.client = redis.createClient();
+
+    this.getAsync = promisify(this.client.get).bind(this.client);
+
+    this.client.on('error', (error) => {
+      console.log(`Redis client not connected to the server: ${error.message}`);
     });
   }
-  /**
-   * 
-   * @returns {boolean}
-   */
-   
+
   isAlive() {
-    return this.isClientConnected;
+    return this.client.connected;
   }
 
-  /**
-   * @param {String} key 
-   * @returns {String | Object}
-   */
   async get(key) {
-    return promisify(this.client.GET).bind(this.client)(key);
+    return this.getAsync(key);
   }
 
-  /**
-   * @param {String} key
-   * @param {String | Number | Boolean} value
-   * @param {Number} duration
-   * @returns {Promise<void>}
-   */
   async set(key, value, duration) {
-    await promisify(this.client.SETEX)
-      .bind(this.client)(key, duration, value);
+    this.client.setex(key, duration, value);
   }
 
-  /**
-   * @param {String} key
-   * @returns {Promise<void>}
-   */
   async del(key) {
-    await promisify(this.client.DEL).bind(this.client)(key);
+    this.client.del(key);
   }
 }
 
-export const redisClient = new RedisClient();
+const redisClient = new RedisClient();
+
 export default redisClient;
 
