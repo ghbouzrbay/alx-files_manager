@@ -30,6 +30,11 @@ class DBClient {
     const user = await this.db.collection('users').findOne(query);
     return user;
   }
+
+  async setUser(query) {
+    const user = await this.db.collection('users').insertOne(query);
+    return user.insertedId;
+  }
 }
 
 const dbClient = new DBClient();
