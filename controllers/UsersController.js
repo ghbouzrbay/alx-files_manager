@@ -36,7 +36,7 @@ class UsersController {
     }
     const useridobj = new ObjectId(userid);
     const user = await dbClient.getUser({ _id: useridobj });
-    return response.send({ email: user.email, password: user.password });
+    return response.send({ email: user.email, id: userid });
   }
 }
 
