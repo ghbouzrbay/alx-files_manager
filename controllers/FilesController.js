@@ -168,6 +168,8 @@ class FilesController {
       .collection('files')
       .findOne({ _id: ObjectId(idFile), userId: user._id });
     if (!fileDocument) return response.status(404).send({ error: 'Not found' });
+    await dbClient.db.collection('files').updateOne({ _id: ObjectId(idFile), userId: user._id },
+      { $set: { isPublic: true } });
     return response.status(200).send({
       id: fileDocument._id,
       userId: fileDocument.userId,
