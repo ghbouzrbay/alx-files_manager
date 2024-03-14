@@ -5,6 +5,8 @@ import Queue from 'bull';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
+const mime = require('mime-types');
+
 class FilesController {
   /**
    * Should create a new file in DB and in disk
@@ -203,6 +205,26 @@ class FilesController {
       isPublic: false,
       parentId: fileDocument.parentId,
     });
+  }
+
+  static async getFile(request, response) {
+    const idFile = request.params.id || '';
+    const fileDocument = await dbClient.db
+      .collection('files')
+      .findOne({ _id: ObjectId(idFile) });
+    if (!fileDocument) return response.status(404).send({ error: 'Not found' });
+    if (!fileDocument.isPublic) {
+      const token = request.headers['x-token'];
+      const keyID = await redisClient.get(`auth_${token}`);
+
+      if (!keyID || fileDocument.userId.toString() !== keyID) { return response.status(404).json({ error: 'Not found' }); }
+    }
+    if (fileDocument.type === 'folder') { return response.status(400).json({ error: 'A folder doesn\'t have content' }); }
+
+    if (!fs.existsSync(fileDocument.localPath)) return response.status(404).json({ error: 'Not found' });
+
+    response.setHeader('Content-Type', mime.lookup(fileDocument.name));
+    return response.sendFile(fileDocument.localPath);
   }
 }
 
