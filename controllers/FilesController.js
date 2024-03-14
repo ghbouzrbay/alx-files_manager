@@ -178,6 +178,7 @@ class FilesController {
       isPublic: true,
       parentId: fileDocument.parentId,
     });
+  }
 
   static async putUnpublish(request, response) {
     const token = request.headers['x-token'];
