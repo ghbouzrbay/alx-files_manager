@@ -179,7 +179,7 @@ class FilesController {
       parentId: fileDocument.parentId,
     });
 
-    static async putUnpublish(request, response) {
+  static async putUnpublish(request, response) {
     const token = request.headers['x-token'];
     if (!token) { return response.status(401).json({ error: 'Unauthorized' }); }
     const keyID = await redisClient.get(`auth_${token}`);
